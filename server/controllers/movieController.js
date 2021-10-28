@@ -1,46 +1,74 @@
-const lodash = require('lodash');
-const { Op } = require('sequelize');
+const { Op } = require("sequelize");
+
 const { Movie } = require('../models');
 
-const findAllMovies = async (req, res) => {
-    const { title } = req.query;
+const getAllMovies = async (req, res) => {
+    const { searchText } = req.query;
 
-    if (title) {
-        const movies = await Movie.findAll({
+    try {
+        const conditions = searchText ? {
             where: {
                 title: {
-                    [Op.or]: {
-                        [Op.substring]: title
-                    }
+                    [Op.iRegexp]: searchText
                 }
             }
-        });
+        } : {};
+        const movies = await Movie.findAll(conditions);
         return res.json(movies);
     }
-    else {
-        const movies = await Movie.findAll({ raw: true });
-        return res.json(movies);
+    catch (e) {
+        res.status(500).json({
+            message: e.message
+        });
     }
 }
 
-const findByMovieId = async (req, res) => {
+const getMovie = async (req, res) => {
     const { movieId } = req.params;
 
-    //const movie = movies.filter(movie => movie.id === Number(movieId));
-    const movie = await Movie.findOne({
-        where: {
-            id: Number(movieId)
-        }
-    })
-    if (!movie) {
-        return res.status(404).json({
-            message: "Movie Id not found!"
+    try {
+        const movie = await Movie.findOne({
+            where: {
+                id: Number(movieId)
+            }
+        });
+        if (!movie) throw new Error("Movie Not Found");
+        res.json({
+            message: 'Movie Found',
+            movie
         });
     }
-    res.json(movie);
+    catch (e) {
+        res.status(404).json({
+            message: e.message
+        });
+    }
 }
 
+const addMovie = async (req, res) => {
+    const { title, poster, rating } = req.body;
+
+    try {
+        const createdMovie = await Movie.create({
+            title,
+            rating,
+            poster
+        });
+        return res.json({
+            message: 'Movie Created',
+            movie: createdMovie
+        })
+    }
+    catch (e) {
+        res.status(500).json({
+            message: e.message
+        });
+    }
+}
+
+
 module.exports = {
-    findAllMovies,
-    findByMovieId
+    getAllMovies,
+    getMovie,
+    addMovie
 }

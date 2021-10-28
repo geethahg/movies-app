@@ -1,42 +1,54 @@
 require('dotenv').config();
 
-const createError = require('http-errors');
 const express = require('express');
-const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const createError = require('http-errors');
 const cors = require('cors');
 
 const models = require('./models');
-const moviesRouter = require('./routes/movies');
+const apiRoutes = require("./routes");
 
-const app = express();
+const { PORT, PG_URI } = process.env;
 
-console.log(process.env.PG_URI);
-app.use(cors());
-app.use(express.json());//application/json
-app.use(express.urlencoded({ extended: false }));//application/x-www-form-urlencoded
-app.use(cookieParser());
+const startServer = async () => {
+  const app = express();
 
-app.use('/movies', moviesRouter);
+  app.use(cors());
+  app.use(logger('dev'));
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: false }));
 
-// catch 404 and forward to error handler
-app.use((req, res, next) => {
-  next(createError(404));
-});
-
-// error handler
-app.use((err, req, res, next) => {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.json({
-    message: '404 error'
+  app.get("/", (req, res) => {
+    res.send("Server is up and running!");
   });
-});
 
+  app.use("/api", apiRoutes);
 
-app.listen(4000, () => {
-  console.log(`Server is running!`);
-})
+  // catch 404 and forward to error handler
+  app.use((req, res, next) => {
+    next(createError(404));
+  });
+
+  // error handler
+  app.use((err, req, res, next) => {
+    // set locals, only providing error in development
+    res.locals.message = err.message;
+    res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+    // render the error page
+    res.status(err.status || 500);
+    res.render('error');
+  });
+
+  app.listen(PORT, () => {
+    console.log(`Server started in port ${PORT}!`);
+  });
+}
+
+try {
+  startServer();
+}
+catch (error) {
+  console.log("Bootstrapping the app server failed!", error);
+}
+

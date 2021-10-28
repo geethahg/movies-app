@@ -30,4 +30,10 @@ Object.keys(db).forEach(modelName => {
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
+//Todo: Danger command to be enabled in local environments
+/*
+sequelize.sync({ force: true })
+    .then(() => console.log("Tables created!"));
+*/
+
 module.exports = db;

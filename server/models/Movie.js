@@ -1,8 +1,9 @@
+const { Sequelize, DataTypes } = require("sequelize");
+
 module.exports = (sequelize, DataTypes) => {
     const Movie = sequelize.define('Movie', {
         id: {
             type: DataTypes.INTEGER,
-            allowNull: false,
             autoIncrement: true,
             primaryKey: true
         },
@@ -13,6 +14,10 @@ module.exports = (sequelize, DataTypes) => {
         poster: {
             type: DataTypes.STRING,
             allowNull: false
+        },
+        rating: {
+            type: DataTypes.INTEGER,
+            allowNull: false
         }
     }, {
         freezeTableName: true,
@@ -21,12 +26,6 @@ module.exports = (sequelize, DataTypes) => {
         tableName: 'movies',
         schema: 'public'
     });
-
-    //Warning: enabling below line and committing in Github is punishable offence
-    //Note: Drop and Recreate Table everytime you start server
-    /*Movie.sync({ force: true }, () => {
-        console.log("Table is created!");
-    })*/
 
     return Movie;
 }
