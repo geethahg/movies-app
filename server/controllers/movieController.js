@@ -67,8 +67,4 @@ const addMovie = async (req, res) => {
 }
 
 
-module.exports = {
-    getAllMovies,
-    getMovie,
-    addMovie
-}
+module.exports = {getAllMovies, getMovie, addMovie}
